@@ -934,6 +934,9 @@
                 facebook: document.getElementById('cfgFb').value,
                 tiktok: document.getElementById('cfgTt').value,
             };
+            // Sincronizar la configuración general en la nube
+            await syncDataToCloud();
+            
             saveDataLocal();
             updateStoreInfoUI();
             alert('Configuración guardada exitosamente.');
@@ -956,6 +959,9 @@
             const val = document.getElementById('catNameInput').value.trim();
             if (val && !categories.includes(val)) {
                 categories.push(val);
+                // Sincronizar categorías en la base de datos de la nube
+                await syncDataToCloud();
+                
                 saveDataLocal();
                 renderCategoryFilters();
                 renderAdminCategories();
@@ -963,13 +969,29 @@
             }
         }
 
-        function deleteCategory(catName) {
+        async function deleteCategory(catName) {
             categories = categories.filter(c => c !== catName);
+    
+            // Sincronizar categorías en la base de datos de la nube
+            await syncDataToCloud();
+
             saveDataLocal();
             renderCategoryFilters();
             renderAdminCategories();
         }
 
+        // Función auxiliar para enviar configuración y categorías a la nube
+        async function syncDataToCloud() {
+            try {
+                await fetch('/api/productos', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'saveGlobalData', config, categories })
+                });
+            } catch (err) {
+                console.error("Error al sincronizar datos globales:", err);
+            }
+        }
         function renderAdminProducts() {
             const tbody = document.getElementById('productsTableBody');
             tbody.innerHTML = products.map(p => `
