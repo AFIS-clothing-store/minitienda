@@ -76,17 +76,24 @@
             
             <!-- HERO BANNER PROMOTIONAL -->
             <section class="bg-gradient-to-r from-[#1b4d3e] via-[#14532d] to-emerald-900 text-white shadow-inner">
-                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 md:py-14">
-                    <div class="md:w-2/3 space-y-3">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 md:py-8">
+                    <div class="md:w-2/3 space-y-2">
                         <span class="inline-block px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-semibold rounded-full border border-emerald-500/30">OFERTAS DE LA SEMANA</span>
-                        <h2 class="text-2xl sm:text-4xl font-extrabold tracking-tight">Encuentra los Mejores Productos al MEJOR PRECIO</h2>
-                        <p class="text-emerald-100 text-sm sm:text-base max-w-xl">Envíos a todo el país. Realiza tu pedido directamente por WhatsApp con métodos de pago seguros como PSE y Nequi.</p>
+                        <h2 class="text-xl sm:text-3xl font-extrabold tracking-tight">Encuentra los Mejores Productos al MEJOR PRECIO</h2>
+                        <p class="text-emerald-100 text-xs sm:text-sm max-w-xl">Envíos a todo el país. Realiza tu pedido directamente por WhatsApp con métodos de pago seguros como PSE y Nequi.</p>
                     </div>
                 </div>
             </section>
 
+            <!-- SECCIÓN INTERMEDIA: BANNER DE IDENTIDAD DE MARCA (CARGADO DESDE ADMIN) -->
+            <section id="storeBannerSection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 hidden">
+                <div class="w-full rounded-2xl overflow-hidden shadow-md border border-slate-100 bg-white">
+                    <img id="storeBannerImg" src="" alt="Banner Oficial de la Tienda" class="w-full h-auto max-h-[420px] object-cover object-center block">
+                </div>
+            </section>
+
             <!-- BARRA DE BÚSQUEDA Y FILTROS DE CATEGORÍAS -->
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-4">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-2">
                 <div class="flex flex-col md:flex-row gap-4 items-center justify-between">
                     <!-- BUSCADOR EN TIEMPO REAL -->
                     <div class="relative w-full md:w-96">
@@ -377,6 +384,28 @@
                         </div>
 
                         <hr class="my-4">
+                        <h4 class="text-sm font-bold text-slate-700">Banner Promocional de Identidad (Opcional)</h4>
+                        <div class="p-4 bg-slate-50 border border-slate-200 rounded-xl space-y-3">
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Imagen del Banner Principal (Se mostrará debajo de la franja verde)</label>
+                                <input type="file" id="cfgBannerFile" accept="image/*" class="w-full px-3 py-2 border border-slate-300 rounded-lg text-sm bg-white file:mr-4 file:py-1 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-emerald-50 file:text-emerald-700 hover:file:bg-emerald-100">
+                                <input type="hidden" id="cfgExistingBannerUrl" value="">
+                                <p class="text-[11px] text-slate-500 mt-1.5 leading-relaxed">
+                                    <strong>Recomendación para un resultado óptimo:</strong> Sube una imagen horizontal (proporción ideal <strong>1200 x 400 px</strong> o <strong>1400 x 450 px</strong>) en formato JPG o PNG. El sistema la optimizará y ajustará automáticamente a cualquier celular o computadora.
+                                </p>
+                            </div>
+                            <div id="cfgBannerPreviewContainer" class="hidden pt-2 border-t border-slate-200">
+                                <div class="flex items-center justify-between mb-1.5">
+                                    <span class="text-xs font-semibold text-slate-600">Banner actual activo:</span>
+                                    <button type="button" onclick="removeBannerImage()" class="text-xs text-red-600 hover:underline font-semibold flex items-center gap-1">
+                                        <i data-lucide="trash-2" class="w-3.5 h-3.5"></i> Quitar banner
+                                    </button>
+                                </div>
+                                <img id="cfgBannerPreviewImg" src="" alt="Vista previa banner" class="w-full max-h-36 object-cover rounded-lg border border-slate-300">
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
                         <h4 class="text-sm font-bold text-slate-700">Redes Sociales (URLs Opcionales)</h4>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
@@ -393,7 +422,7 @@
                             </div>
                         </div>
 
-                        <button type="submit" class="px-6 py-2.5 bg-[#1b4d3e] text-white font-bold rounded-xl hover:bg-[#14532d] transition text-sm">Guardar Configuración</button>
+                        <button type="submit" id="saveCompanyBtn" class="px-6 py-2.5 bg-[#1b4d3e] text-white font-bold rounded-xl hover:bg-[#14532d] transition text-sm">Guardar Configuración</button>
                     </form>
                 </div>
 
@@ -506,7 +535,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT APPLICATION LOGIC CONECTADO A LA NUBE EN TIEMPO REAL + ZOOM DE IMAGEN -->
+    <!-- JAVASCRIPT APPLICATION LOGIC CONECTADO A LA NUBE EN TIEMPO REAL + ZOOM DE IMAGEN + BANNER -->
     <script>
         const DEFAULT_CONFIG = {
             storeName: 'MiTienda Digital',
@@ -517,6 +546,7 @@
             whatsapp: '573001234567',
             nequiNum: '3001234567',
             nequiOwner: 'MiTienda Digital',
+            bannerUrl: '',
             instagram: 'https://instagram.com',
             facebook: 'https://facebook.com',
             tiktok: 'https://tiktok.com'
@@ -637,6 +667,17 @@
             document.getElementById('footerWp').textContent = `WhatsApp: +${config.whatsapp}`;
             document.getElementById('checkoutNequiNum').textContent = config.nequiNum;
             document.getElementById('checkoutNequiOwner').textContent = config.nequiOwner;
+
+            // Actualizar Banner Intermedio si existe URL válida
+            const bannerSection = document.getElementById('storeBannerSection');
+            const bannerImg = document.getElementById('storeBannerImg');
+            if (config.bannerUrl && typeof config.bannerUrl === 'string' && config.bannerUrl.trim().startsWith('http')) {
+                bannerImg.src = config.bannerUrl.trim();
+                bannerSection.classList.remove('hidden');
+            } else {
+                bannerImg.src = '';
+                bannerSection.classList.add('hidden');
+            }
 
             const socialsDiv = document.getElementById('footerSocials');
             socialsDiv.innerHTML = '';
@@ -901,19 +942,30 @@
 
             const total = cart.reduce((acc, i) => acc + (i.price * i.qty), 0);
 
-            let summary = `🛒 *NUEVO PEDIDO - ${config.storeName}*\n\n`;
-            summary += `👤 *Cliente:* ${name}\n`;
-            summary += `🆔 *Doc:* ${idDoc}\n`;
-            summary += `📱 *Teléfono:* ${phone}\n`;
-            summary += `📍 *Dirección:* ${address}, ${city} - ${state}\n`;
-            summary += `💳 *Método de Pago:* ${method}\n\n`;
-            summary += `📦 *Detalle del Pedido:*\n`;
+            let summary = `🛒 *NUEVO PEDIDO - ${config.storeName}*
+
+`;
+            summary += `👤 *Cliente:* ${name}
+`;
+            summary += `🆔 *Doc:* ${idDoc}
+`;
+            summary += `📱 *Teléfono:* ${phone}
+`;
+            summary += `📍 *Dirección:* ${address}, ${city} - ${state}
+`;
+            summary += `💳 *Método de Pago:* ${method}
+
+`;
+            summary += `📦 *Detalle del Pedido:*
+`;
 
             cart.forEach(item => {
-                summary += `• ${item.title} x${item.qty} - ${formatCOP(item.price * item.qty)}\n`;
+                summary += `• ${item.title} x${item.qty} - ${formatCOP(item.price * item.qty)}
+`;
             });
 
-            summary += `\n💰 *TOTAL A PAGAR:* ${formatCOP(total)}`;
+            summary += `
+💰 *TOTAL A PAGAR:* ${formatCOP(total)}`;
 
             const waUrl = `https://wa.me/${config.whatsapp}?text=${encodeURIComponent(summary)}`;
             
@@ -958,31 +1010,114 @@
             document.getElementById('cfgWp').value = config.whatsapp;
             document.getElementById('cfgNequiNum').value = config.nequiNum;
             document.getElementById('cfgNequiOwner').value = config.nequiOwner;
+            document.getElementById('cfgBannerFile').value = '';
+            document.getElementById('cfgExistingBannerUrl').value = config.bannerUrl || '';
             document.getElementById('cfgIg').value = config.instagram || '';
             document.getElementById('cfgFb').value = config.facebook || '';
             document.getElementById('cfgTt').value = config.tiktok || '';
+
+            const previewContainer = document.getElementById('cfgBannerPreviewContainer');
+            const previewImg = document.getElementById('cfgBannerPreviewImg');
+            if (config.bannerUrl && config.bannerUrl.trim().startsWith('http')) {
+                previewImg.src = config.bannerUrl;
+                previewContainer.classList.remove('hidden');
+            } else {
+                previewImg.src = '';
+                previewContainer.classList.add('hidden');
+            }
+            lucide.createIcons();
+        }
+
+        function removeBannerImage() {
+            document.getElementById('cfgExistingBannerUrl').value = '';
+            document.getElementById('cfgBannerFile').value = '';
+            document.getElementById('cfgBannerPreviewImg').src = '';
+            document.getElementById('cfgBannerPreviewContainer').classList.add('hidden');
         }
 
         async function saveCompanySettings(e) {
             e.preventDefault();
-            config = {
-                storeName: document.getElementById('cfgStoreName').value,
-                legalName: document.getElementById('cfgLegalName').value,
-                nit: document.getElementById('cfgNit').value,
-                address: document.getElementById('cfgAddress').value,
-                phone: document.getElementById('cfgPhone').value,
-                whatsapp: document.getElementById('cfgWp').value,
-                nequiNum: document.getElementById('cfgNequiNum').value,
-                nequiOwner: document.getElementById('cfgNequiOwner').value,
-                instagram: document.getElementById('cfgIg').value,
-                facebook: document.getElementById('cfgFb').value,
-                tiktok: document.getElementById('cfgTt').value,
-            };
+            const saveBtn = document.getElementById('saveCompanyBtn');
+            const originalText = saveBtn.textContent;
+            saveBtn.disabled = true;
 
-            await syncGlobalDataToCloud();
-            saveDataLocal();
-            updateStoreInfoUI();
-            alert('¡Configuración guardada y sincronizada en tiempo real!');
+            try {
+                let bannerUrl = document.getElementById('cfgExistingBannerUrl').value || '';
+                const bannerFileInput = document.getElementById('cfgBannerFile');
+
+                if (bannerFileInput.files && bannerFileInput.files.length > 0) {
+                    saveBtn.textContent = "Optimizando y subiendo banner...";
+                    const file = bannerFileInput.files[0];
+
+                    const compressedBanner = await new Promise((resolve, reject) => {
+                        const reader = new FileReader();
+                        reader.readAsDataURL(file);
+                        reader.onload = (event) => {
+                            const img = new Image();
+                            img.src = event.target.result;
+                            img.onload = () => {
+                                const canvas = document.createElement('canvas');
+                                const MAX_WIDTH = 1400;
+                                const scaleSize = MAX_WIDTH / img.width;
+
+                                canvas.width = img.width > MAX_WIDTH ? MAX_WIDTH : img.width;
+                                canvas.height = img.width > MAX_WIDTH ? img.height * scaleSize : img.height;
+
+                                const ctx = canvas.getContext('2d');
+                                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+                                canvas.toBlob((blob) => {
+                                    resolve(new File([blob], `banner-${Date.now()}.jpg`, { type: 'image/jpeg', lastModified: Date.now() }));
+                                }, 'image/jpeg', 0.88);
+                            };
+                            img.onerror = () => reject(new Error("No se pudo procesar la imagen seleccionada."));
+                        };
+                        reader.onerror = () => reject(new Error("Error al leer el archivo desde el equipo."));
+                    });
+
+                    const uploadRes = await fetch(`/api/upload?filename=${encodeURIComponent(compressedBanner.name)}`, {
+                        method: 'POST',
+                        body: compressedBanner
+                    });
+
+                    if (!uploadRes.ok) {
+                        throw new Error("Fallo al subir la imagen del banner al servidor.");
+                    }
+
+                    const uploadData = await uploadRes.json();
+                    if (uploadData.url) {
+                        bannerUrl = uploadData.url;
+                    }
+                }
+
+                saveBtn.textContent = "Guardando configuración...";
+                config = {
+                    storeName: document.getElementById('cfgStoreName').value,
+                    legalName: document.getElementById('cfgLegalName').value,
+                    nit: document.getElementById('cfgNit').value,
+                    address: document.getElementById('cfgAddress').value,
+                    phone: document.getElementById('cfgPhone').value,
+                    whatsapp: document.getElementById('cfgWp').value,
+                    nequiNum: document.getElementById('cfgNequiNum').value,
+                    nequiOwner: document.getElementById('cfgNequiOwner').value,
+                    bannerUrl: bannerUrl,
+                    instagram: document.getElementById('cfgIg').value,
+                    facebook: document.getElementById('cfgFb').value,
+                    tiktok: document.getElementById('cfgTt').value,
+                };
+
+                await syncGlobalDataToCloud();
+                saveDataLocal();
+                updateStoreInfoUI();
+                loadAdminFormData();
+                alert('¡Configuración y banner guardados y sincronizados en tiempo real con éxito!');
+            } catch (err) {
+                console.error("Error al guardar configuración:", err);
+                alert("Hubo un error al guardar: " + err.message);
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = originalText;
+            }
         }
 
         function renderAdminCategories() {
@@ -1019,14 +1154,13 @@
         }
 
         async function syncGlobalDataToCloud() {
-            try {
-                await fetch('/api/productos', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'saveGlobalData', config, categories })
-                });
-            } catch (err) {
-                console.error("Error al sincronizar con la nube:", err);
+            const response = await fetch('/api/productos', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'saveGlobalData', config, categories })
+            });
+            if (!response.ok) {
+                throw new Error("No se pudo sincronizar la configuración con la nube.");
             }
         }
 
