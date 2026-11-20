@@ -154,8 +154,11 @@
             </button>
             <!-- GALERÍA DE FOTOS (HASTA 5 MINIATURAS) -->
             <div class="md:w-1/2 p-4 bg-slate-50 flex flex-col justify-between">
-                <div class="aspect-square bg-white rounded-xl overflow-hidden shadow-sm mb-3">
+                <div class="aspect-square bg-white rounded-xl overflow-hidden shadow-sm mb-3 relative group cursor-zoom-in" onclick="openImageZoom(document.getElementById('modalMainImg').src)">
                     <img id="modalMainImg" src="" alt="" class="w-full h-full object-cover transition duration-200">
+                    <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition flex items-center justify-center text-white text-xs font-bold gap-1">
+                        <i data-lucide="zoom-in" class="w-5 h-5"></i> Clic para ampliar
+                    </div>
                 </div>
                 <div id="modalThumbnails" class="flex gap-2 overflow-x-auto pb-1 custom-scrollbar">
                     <!-- Miniaturas inyectadas dinámicamente -->
@@ -178,6 +181,14 @@
                 </button>
             </div>
         </div>
+    </div>
+
+    <!-- MODAL ZOOM DE IMAGEN (PANTALLA COMPLETA) -->
+    <div id="imageZoomModal" class="fixed inset-0 z-[100] bg-black/90 backdrop-blur-md flex items-center justify-center p-4 hidden" onclick="closeImageZoom()">
+        <button class="absolute top-4 right-4 text-white bg-white/10 p-2.5 rounded-full hover:bg-white/20 transition z-10">
+            <i data-lucide="x" class="w-6 h-6"></i>
+        </button>
+        <img id="zoomedImg" src="" class="max-w-full max-h-[95vh] object-contain rounded-lg shadow-2xl">
     </div>
 
     <!-- DRAWER / CARRITO DE COMPRAS DESPLEGABLE -->
@@ -495,7 +506,7 @@
         </div>
     </div>
 
-    <!-- JAVASCRIPT APPLICATION LOGIC CONECTADO A LA NUBE EN TIEMPO REAL -->
+    <!-- JAVASCRIPT APPLICATION LOGIC CONECTADO A LA NUBE EN TIEMPO REAL + ZOOM DE IMAGEN -->
     <script>
         const DEFAULT_CONFIG = {
             storeName: 'MiTienda Digital',
@@ -523,7 +534,6 @@
         window.addEventListener('DOMContentLoaded', async () => {
             document.getElementById('yearSpan').textContent = new Date().getFullYear();
             
-            // Cargar configuración, categorías y productos desde la nube en tiempo real
             await cargarDatosGlobalesDesdeNube();
 
             updateStoreInfoUI();
@@ -535,6 +545,18 @@
             renderCartUI();
             lucide.createIcons();
         });
+
+        // FUNCIONES DE ZOOM PARA LA IMAGEN EN EL MODAL DE DETALLES
+        function openImageZoom(imgSrc) {
+            if (!imgSrc) return;
+            document.getElementById('zoomedImg').src = imgSrc;
+            document.getElementById('imageZoomModal').classList.remove('hidden');
+            lucide.createIcons();
+        }
+
+        function closeImageZoom() {
+            document.getElementById('imageZoomModal').classList.add('hidden');
+        }
 
         async function cargarDatosGlobalesDesdeNube() {
             try {
@@ -557,7 +579,6 @@
             try {
                 const response = await fetch('/api/productos');
                 const data = await response.json();
-                // Soporta tanto si devuelve solo el array de productos como si devuelve un objeto global
                 const prodsArray = Array.isArray(data) ? data : (data.products || []);
                 if (Array.isArray(prodsArray)) {
                     products = prodsArray;
@@ -942,7 +963,6 @@
             document.getElementById('cfgTt').value = config.tiktok || '';
         }
 
-        // SINCRONIZACIÓN EN TIEMPO REAL CON LA NUBE PARA CONFIGURACIÓN
         async function saveCompanySettings(e) {
             e.preventDefault();
             config = {
@@ -977,7 +997,6 @@
             `).join('');
         }
 
-        // SINCRONIZACIÓN EN TIEMPO REAL CON LA NUBE PARA CATEGORÍAS
         async function saveCategory(e) {
             e.preventDefault();
             const val = document.getElementById('catNameInput').value.trim();
